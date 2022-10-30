@@ -15,7 +15,7 @@ var c_clients = 0;
 var c_sales = 0;
 var av = 0;
 
-const sales = async () => {
+const sale = async () => {
     const consumer = kafka.consumer({ groupId: 'DailySales' , fromBeginning: true});
     await consumer.connect();
     await consumer.subscribre({ topic: 'newSale' });

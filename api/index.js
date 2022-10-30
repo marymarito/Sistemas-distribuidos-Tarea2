@@ -22,13 +22,20 @@ app.post("/register", async (req, res) => {
             topic: 'Register',
             messages: [{value: JSON.stringify(req.body), partition: 1}]
         })
+        
         console.log("Se registro un sopaipillero premium");
+        app.get('/', function (req, res) {
+            res.status(200).send('Status: 200 OK')
+        });
     }else{
         await producer.send({
             topic: 'Register',
             messages: [{value: JSON.stringify(req.body), partition: 0}]
         })
         console.log("Se registro un sopaipillero que no es premium");
+        app.get('/', function (req, res) {
+            res.status(500).send('Status: 500 ERROR')
+        });
     }
     await producer.disconnect().then(
         res.status(200).json({
@@ -38,7 +45,7 @@ app.post("/register", async (req, res) => {
 });
 
 //registro de una venta
-app.post("/sold", async (req, res) => {
+app.post("/rventa", async (req, res) => {
     await producer.connect();
     await producer.send({
         topic: 'newSale',
