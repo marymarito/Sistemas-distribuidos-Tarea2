@@ -1,0 +1,78 @@
+version: '3'
+services:
+  
+  zookeeper:
+    image: 'bitnami/zookeeper:3.7.0'
+    restart: always
+    environment:
+      ALLOW_ANONYMOUS_LOGIN: "yes"
+    ports:
+      - 2181:2181
+      - 2888:2888
+      - 3888:3888
+
+  kafka:
+    image: 'bitnami/kafka:2.8.1'
+    restart: always
+    depends_on:
+      - zookeeper
+    environment:
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+      KAFKA_CFG_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_CFG_NUM_PARTITIONS: 2
+    ports:
+      - 9092:9092
+
+  api: 
+    build: ./api/
+    restart: always
+    environment:
+      PORT: 3000
+      kafkaHost: kafka:9092
+    depends_on:
+      - kafka
+      - db
+    ports:
+      - 3000:3000
+
+  stock: 
+    build: ./rstock/
+    restart: always
+    environment:
+       PORT: 3000
+       kafkaHost: kafka:9092
+    depends_on:
+      - kafka
+      - db
+    ports:
+      - 5000:3000
+
+  location: 
+    build: ./rubicacion/
+    restart: always
+    environment:
+       PORT: 3000
+       kafkaHost: kafka:9092
+    depends_on:
+      - kafka
+      - db
+    ports:
+      - 4000:3000
+  
+  sale: 
+    build: ./rventa/
+    restart: always
+    environment:
+       PORT: 3000
+       kafkaHost: kafka:9092
+    depends_on:
+      - kafka
+      - db
+    ports:
+      - 6000:3000
+
+  db:
+    image: mongo:6.0.2
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
