@@ -23,56 +23,63 @@ services:
     ports:
       - 9092:9092
 
+  database:
+    image: bitnami/postgresql:12.10.0
+    container_name: db-tarea2
+    volumes:
+      - './db/data:/bitnami/postgresql'
+      - './db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro'
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRESQL_USER: postgres
+      POSTGRESQL_PASSWORD: postgres
+      POSTGRESQL_DATABASE: tarea2
+    restart: always
+
+
   api: 
-    build: ./api/
+    build: ./api
     restart: always
     environment:
-      PORT: 3000
+      
       kafkaHost: kafka:9092
     depends_on:
       - kafka
-      - db
+      - database
     ports:
-      - 3001:3000
+      - 3000:3000
 
   stock: 
-    build: ./rstock/
+    build: ./rstock
     restart: always
     environment:
-       PORT: 3000
        kafkaHost: kafka:9092
     depends_on:
       - kafka
-      - db
+      - database
     ports:
       - 5000:3000
 
   location: 
-    build: ./rubicacion/
+    build: ./rubicacion
     restart: always
     environment:
-       PORT: 3000
        kafkaHost: kafka:9092
     depends_on:
       - kafka
-      - db
+      - database
     ports:
       - 4000:3000
   
   sale: 
-    build: ./rventa/
+    build: ./rventa
     restart: always
     environment:
-       PORT: 3000
        kafkaHost: kafka:9092
     depends_on:
       - kafka
-      - db
+      - database
     ports:
       - 6000:3000
 
-  db:
-    image: mongo:6.0.2
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: example
