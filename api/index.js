@@ -45,12 +45,19 @@ app.post("/register", async (req, res) => {
 });
 
 //registro de una venta
-app.post("/rventa", async (req, res) => {
+app.post("/sale", async (req, res) => {
     await producer.connect();
     await producer.send({
         topic: 'newSale',
         messages: [{value: JSON.stringify(req.body) }]
     })
+
+    //de esta venta aprovechamos que tenemos la ubicación
+    await producer.send({
+        topic: 'Locations',
+        messages: [{value: JSON.stringify(req.body), partition: 0}]
+      })
+
     await producer.disconnect().then(
         res.status(200).json({
             data: req.body
@@ -58,4 +65,35 @@ app.post("/rventa", async (req, res) => {
     )
 });
 
+//actividad extraña de ubicación de carrito
+app.post("/odd", async (req, res) => {
+    await producer.connect();
+    await producer.send({
+      topic: 'Locations',
+      messages: [{value: JSON.stringify(req.body), partition: 1}]
+    })
+    await producer.disconnect().then(
+        res.status(200).json({
+            data: req.body
+        })
+    )
+  });
+  
+//registro ubicación
+app.post("/location", async (req, res) => {
+    await producer.connect();
+    await producer.send({
+      topic: 'Locations',
+      messages: [{value: JSON.stringify(req.body), partition: 0}]
+    })
+    await producer.disconnect().then(
+        res.status(200).json({
+            data: req.body
+        })
+    )
+  });
 
+
+  app.listen(port, () => {
+    console.log(`La API esta corriendo en  http://localhost:${port}`);
+  });
